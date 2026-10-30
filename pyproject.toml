@@ -1,0 +1,21 @@
+[project]
+name = "nlp-group21-project"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Thomas Mandelz", email = "thomas.mandelz@student.uva.nl" }
+]
+requires-python = ">=3.9"
+dependencies = [
+    "datasets>=4.5.0",
+    "numpy>=2.0.2",
+    "tokenizers>=0.22.2",
+]
+
+[project.scripts]
+nlp-group21-project = "nlp_group21_project:main"
+
+[build-system]
+requires = ["uv_build>=0.13.6,<0.14.0"]
+build-backend = "uv_build"
