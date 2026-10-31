@@ -1,8 +1,14 @@
 from tokenizers import Tokenizer
+from tokenizers.models import BPE
+from tokenizers.trainers import BpeTrainer
+from tokenizers.pre_tokenizers import Metaspace
 import numpy as np
 from abc import ABC, abstractmethod
 from typing import List, Sequence
 from sentence_transformers import SentenceTransformer
+
+
+# ---------- Thomas: tokenizer wrappers ----------
 
 class BaseTokenizer(ABC):
     """Minimal interface every tokenizer must implement."""
@@ -33,41 +39,25 @@ class SentenceTransformerTokenizer(HFTokenizerWrapper):
 
     def __init__(self, model_name: str = "sentence-transformers/nli-mpnet-base-v2",
                  max_length: int = 64):
-        
         st_model = SentenceTransformer(model_name, device="cpu")
         super().__init__(st_model.tokenizer, max_length)
 
 
-class TokenIndicator():
+# ---------- BPE tokenizer (copied from part1/experiment.py, NLP1 tutorial) ----------
 
-    def __init__(self, tokenizer: Tokenizer):
-        self.tokenizer = tokenizer
-
-    def __len__(self) -> int:
-        """Dimensionality of the representation space"""
-        return len(self.tokenizer.get_vocab())
-
-    def __call__(self, x: str) -> 'np.array':
-        """Represent x as a D-dimensional vector of real numbers"""
-        unique_token_ids = list(set(self.tokenizer.encode(x).ids))
-
-        # A 0 vector with the same length as the vocabulary except in positions corresponding
-        # to tokens appearing in the document
-        vector = np.zeros(len(self))
-        vector[unique_token_ids] = 1
-        return vector
-
-
-class BagofWords():
-
-    def __init__(self, tokenizer: Tokenizer):
-        self.tokenizer = tokenizer
-
-    def __len__(self) -> int:
-        """Dimensionality of the representation space"""
-        return len(self.tokenizer.get_vocab())
-
-    def __call__(self, x: str) -> np.array:
-        """Represent x as a D-dimensional vector of real numbers"""
-        raise NotImplementedError(
-            "Concrete implementations will be done later")
+def train_tokenizer(corpus, vocab_size, min_frequency, pretokenizer=Metaspace(), unk_token="[UNK]"):
+    """
+    corpus: a list of texts (each a string)
+    vocab_size: number of distinct BPE tokens
+    min_frequency: we only merge token pairs that are frequent enough
+    pretokenizer: a simple tokenizer that we use before BPE tokenization
+    """
+    tokenizer = Tokenizer(BPE(unk_token=unk_token))
+    tokenizer.pre_tokenizer = pretokenizer
+    trainer = BpeTrainer(
+        vocab_size=vocab_size,
+        min_frequency=min_frequency,
+        special_tokens=[unk_token]
+    )
+    tokenizer.train_from_iterator(corpus, trainer=trainer)
+    return tokenizer
