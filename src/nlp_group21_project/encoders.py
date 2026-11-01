@@ -41,7 +41,13 @@ class BagofWords(Encoder):
 
     def __call__(self, x: str) -> np.array:
         """Represent x as a D-dimensional vector of real numbers"""
-        raise NotImplementedError("Concrete implementations will be done later")
+        token_ids = list(self.tokenizer.encode(x).ids)
+
+        # A 0 vector with the same length as the vocabulary except in positions corresponding 
+        # to tokens appearing in the document, where the value is the counter of appearances
+        vector = np.zeros(len(self))
+        np.add.at(vector, token_ids, 1)
+        return vector
 
 #third representation wtv it is
 
