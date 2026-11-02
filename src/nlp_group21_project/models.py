@@ -3,7 +3,7 @@ import torch.nn as nn
 
 
 def pair_features(u, v):
-    """Given two tensors u and v, returns the concatenation of [u, v, |u-v|, u*v], 
+    """Given two tensors u and v, returns the concatenation of [u, v, |u-v|, u*v],
     which is a common feature representation for sentence-pair classification tasks. Because it takes into account
     the similarity and difference between the two vectors, it is often used in natural language inference (NLI) tasks."""
     return torch.cat([u, v, (u - v).abs(), u * v], dim=-1)
@@ -15,8 +15,16 @@ class MLPNLI(nn.Module):
       token ids -> embedding -> masked pooling (per sentence) -> [u, v, |u-v|, u*v] -> MLP -> logits
     """
 
-    def __init__(self, vocab_size, pad_token_id, emb_dim=300, hidden_dims=(256, 128),
-                 num_classes=3, dropout=0.0, pooling="mean"):
+    def __init__(
+        self,
+        vocab_size,
+        pad_token_id,
+        emb_dim=300,
+        hidden_dims=(128, 64),
+        num_classes=3,
+        dropout=0.3,
+        pooling="mean",
+    ):
         super().__init__()
         assert pooling in {"mean", "max"}
         self.pooling = pooling
@@ -30,8 +38,8 @@ class MLPNLI(nn.Module):
         self.mlp = nn.Sequential(*layers)
 
     def encode(self, ids, mask):
-        x = self.emb(ids)                                   # [B, T, E]
-        m = mask.unsqueeze(-1)                              # [B, T, 1]
+        x = self.emb(ids)  # [B, T, E]
+        m = mask.unsqueeze(-1)  # [B, T, 1]
         if self.pooling == "mean":
             return (x * m).sum(1) / m.sum(1).clamp(min=1)
         return x.masked_fill(m == 0, -1e9).max(1).values
