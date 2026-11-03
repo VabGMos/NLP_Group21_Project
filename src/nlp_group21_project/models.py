@@ -9,6 +9,22 @@ def pair_features(u, v):
     return torch.cat([u, v, (u - v).abs(), u * v], dim=-1)
 
 
+class FeatureMLP(nn.Module):
+    """Classify already-encoded sentence pairs (no tokenizer or embedding layer)."""
+
+    def __init__(self, input_dim, hidden_dims=(128,), num_classes=3, dropout=0.3):
+        super().__init__()
+        layers, in_dim = [], input_dim
+        for h in hidden_dims:
+            layers += [nn.Linear(in_dim, h), nn.ReLU(), nn.Dropout(dropout)]
+            in_dim = h
+        layers.append(nn.Linear(in_dim, num_classes))
+        self.mlp = nn.Sequential(*layers)
+
+    def forward(self, features):
+        return self.mlp(features)
+
+
 class MLPNLI(nn.Module):
     """
     MLP for sentence-pair classification:
