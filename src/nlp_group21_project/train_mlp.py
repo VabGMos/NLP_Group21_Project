@@ -13,10 +13,10 @@ from utils import Config, to_device, set_seed
 from dataset import SNLIDataset, cache_tokenized_dataset, make_dataloader
 from tokenizer import BaseTokenizer, SentenceTransformerTokenizer
 from eval import evaluate
-from models import MLPNLI
+from models import MLPNLI, MLPSimple
 
 
-MODEL_REGISTRY = {"mlp": MLPNLI}
+MODEL_REGISTRY = {"mlp": MLPNLI, "mlp_simple": MLPSimple}
 
 
 def _wandb_metrics(prefix, metrics):
