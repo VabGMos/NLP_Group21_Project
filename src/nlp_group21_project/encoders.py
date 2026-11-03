@@ -52,6 +52,16 @@ class BagofWords(Encoder):
 
 # third representation wtv it is
 
+class MPNetEncoder(Encoder):
+    def __init__(self, sentence_model):
+        self.model = sentence_model
+
+    def __len__(self):
+        return self.model.get_sentence_embedding_dimension()
+
+    def __call__(self, text):
+        return self.model.encode(text, convert_to_numpy=True)
+
 
 # pair encoder for all encoders
 class PairEncoder(Encoder):
