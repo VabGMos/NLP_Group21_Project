@@ -48,3 +48,41 @@ class MLPNLI(nn.Module):
         u = self.encode(batch["premise_ids"], batch["premise_mask"])
         v = self.encode(batch["hypothesis_ids"], batch["hypothesis_mask"])
         return self.mlp(pair_features(u, v))
+
+
+class MLPSimple(MLPNLI):
+    """
+    Simpler MLP: same embedding + pooling, but the features are just [u, v]
+    and there is a single hidden layer.
+    """
+
+    def __init__(
+        self,
+        vocab_size,
+        pad_token_id,
+        emb_dim=300,
+        hidden_dims=(128,),
+        num_classes=3,
+        dropout=0.3,
+        pooling="mean",
+    ):
+        super().__init__(
+            vocab_size,
+            pad_token_id,
+            emb_dim=emb_dim,
+            hidden_dims=hidden_dims,
+            num_classes=num_classes,
+            dropout=dropout,
+            pooling=pooling,
+        )
+        layers, in_dim = [], 2 * emb_dim
+        for h in hidden_dims:
+            layers += [nn.Linear(in_dim, h), nn.ReLU(), nn.Dropout(dropout)]
+            in_dim = h
+        layers.append(nn.Linear(in_dim, num_classes))
+        self.mlp = nn.Sequential(*layers)
+
+    def forward(self, batch):
+        u = self.encode(batch["premise_ids"], batch["premise_mask"])
+        v = self.encode(batch["hypothesis_ids"], batch["hypothesis_mask"])
+        return self.mlp(torch.cat([u, v], dim=-1))
