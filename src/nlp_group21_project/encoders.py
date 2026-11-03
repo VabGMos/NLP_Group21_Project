@@ -50,8 +50,6 @@ class BagofWords(Encoder):
         return vector
 
 
-# third representation wtv it is
-
 class MPNetEncoder(Encoder):
     def __init__(self, sentence_model):
         self.model = sentence_model

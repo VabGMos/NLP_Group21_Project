@@ -5,31 +5,6 @@ import pickle
 from joblib import Parallel, delayed
 
 
-def encode_batch(batch, encoder):
-    return [encoder(text) for text in batch]
-
-
-def parallel_encode(texts, encoder, n_jobs=-1, batch_size=1000):
-    batches = [
-        texts[i:i + batch_size]
-        for i in range(0, len(texts), batch_size)
-    ]
-
-    results = Parallel(
-        n_jobs=n_jobs,
-        backend="loky",
-    )(
-        delayed(encode_batch)(batch, encoder)
-        for batch in batches
-    )
-
-    return [
-        vector
-        for batch in results
-        for vector in batch
-    ]
-
-
 def encode_sparse(texts, encoder, batch_size=1000):
     """Encode one small dense batch at a time, keeping completed batches sparse."""
     chunks = []
