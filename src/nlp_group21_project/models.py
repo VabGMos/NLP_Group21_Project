@@ -24,7 +24,6 @@ class FeatureMLP(nn.Module):
     def forward(self, features):
         return self.mlp(features)
 
-
 class MLPNLI(nn.Module):
     """
     MLP for sentence-pair classification:
@@ -35,17 +34,26 @@ class MLPNLI(nn.Module):
         self,
         vocab_size,
         pad_token_id,
-        emb_dim=300,
+        emb_dim=768,
         hidden_dims=(128, 64),
         num_classes=3,
         dropout=0.3,
         pooling="mean",
+        pretrained=True
     ):
         super().__init__()
         assert pooling in {"mean", "max"}
         self.pooling = pooling
-        self.emb = nn.Embedding(vocab_size, emb_dim, padding_idx=pad_token_id)
-
+        if pretrained:
+            self.emb = nn.Embedding(vocab_size, emb_dim, padding_idx=pad_token_id)
+        else:
+            pretrained = AutoModel.from_pretrained(
+            "sentence-transformers/all-mpnet-base-v2")
+            self.emb = nn.Embedding.from_pretrained(
+                pretrained.get_input_embeddings().weight.detach(),
+                freeze=False,
+                padding_idx=pad_token_id
+            )
         layers, in_dim = [], 4 * emb_dim
         for h in hidden_dims:
             layers += [nn.Linear(in_dim, h), nn.ReLU(), nn.Dropout(dropout)]
@@ -76,7 +84,8 @@ class MLPSimple(MLPNLI):
         self,
         vocab_size,
         pad_token_id,
-        emb_dim=300,
+        pretrained=True,
+        emb_dim=768,
         hidden_dims=(128,),
         num_classes=3,
         dropout=0.3,
@@ -90,6 +99,7 @@ class MLPSimple(MLPNLI):
             num_classes=num_classes,
             dropout=dropout,
             pooling=pooling,
+            pretrained=pretrained
         )
         layers, in_dim = [], 2 * emb_dim
         for h in hidden_dims:
