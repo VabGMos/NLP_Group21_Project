@@ -1,5 +1,5 @@
 import torch
-import torch.nn as nn
+from torch import nn
 
 
 def pair_features(u, v):
@@ -16,7 +16,9 @@ class VectorMLPNLI(nn.Module):
 
     def __init__(self, input_dim, hidden_dims=(128, 64), num_classes=3, dropout=0.3):
         super().__init__()
-        assert input_dim % 2 == 0, "expects [u ; v]: premise and hypothesis vectors of equal size"
+        assert input_dim % 2 == 0, (
+            "expects [u ; v]: premise and hypothesis vectors of equal size"
+        )
         self.d = input_dim // 2
         layers, in_dim = [], 4 * self.d
         for h in hidden_dims:
