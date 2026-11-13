@@ -1,5 +1,5 @@
-from tokenizers import Tokenizer
 import numpy as np
+from tokenizers import Tokenizer
 
 
 class Encoder:

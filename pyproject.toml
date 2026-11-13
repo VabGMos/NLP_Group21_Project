@@ -1,7 +1,7 @@
 [project]
 name = "nlp-group21-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "NLP Group 21 Project"
 readme = "README.md"
 authors = [
     { name = "Thomas Mandelz", email = "thomas.mandelz@student.uva.nl" }
@@ -15,6 +15,7 @@ dependencies = [
     "numpy>=2.0.2",
     "omegaconf>=2.3.1",
     "requests>=2.28.1",
+    "ruff>=0.17.4",
     "sentence-transformers>=5.1.2",
     "tokenizers>=0.22.2",
     "torch>=2.8.0",
@@ -22,13 +23,6 @@ dependencies = [
     "torchvision>=0.26.0",
     "wandb>=0.21.0",
 ]
-
-[project.scripts]
-nlp-group21-project = "nlp_group21_project:main"
-
-[build-system]
-requires = ["uv_build>=0.13.6,<0.14.0"]
-build-backend = "uv_build"
 
 [tool.uv.sources]
 torch = { index = "pytorch-cu128" }
