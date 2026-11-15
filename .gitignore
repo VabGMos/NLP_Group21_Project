@@ -228,3 +228,6 @@ uv.lock
 # Training outputs
 checkpoints/
 wandb/
+lightning_logs/
+output/tuning/
+project_2/output*
