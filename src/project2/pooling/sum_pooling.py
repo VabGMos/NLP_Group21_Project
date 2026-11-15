@@ -1,0 +1,5 @@
+class SumPooling:
+    """Sum a nonempty [tokens, dimensions] NumPy array over tokens."""
+
+    def __call__(self, vectors):
+        return vectors.sum(axis=0)
