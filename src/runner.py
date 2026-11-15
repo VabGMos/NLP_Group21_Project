@@ -26,6 +26,7 @@ DEFAULT_PARAMS = {
     "batch_size": 128,
     "clip_norm": 1.0,
     "rnn": "gru",
+    "pooling": None,  # None keeps the recurrent encoder; otherwise mean/sum/max.
     "hidden_size": 128,
     "num_layers": 1,
     "bidirectional": True,

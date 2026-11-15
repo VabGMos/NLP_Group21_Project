@@ -2,6 +2,8 @@ import torch
 from torch import nn
 from torch.nn.utils.rnn import pack_padded_sequence
 
+from src.pooling_sentence_encoder import PoolingSentenceEncoder
+
 
 def pair_features(u, v):
     """Concatenate the sentence vectors, their absolute difference and product."""
@@ -148,17 +150,27 @@ def build_pair_model(
     rnn_dropout=0.2,
     mlp_hidden_dims=(256,),
     mlp_dropout=0.2,
+    pooling=None,
 ):
-    """Embedding -> recurrent encoder (gru/lstm/rnn) -> MLP -> logits."""
-    encoder = RecurrentSentenceEncoder(
-        embedding_weights,
-        pad_id,
-        rnn_type=rnn_type,
-        hidden_size=hidden_size,
-        num_layers=num_layers,
-        bidirectional=bidirectional,
-        freeze_embeddings=freeze_embeddings,
-        embedding_dropout=embedding_dropout,
-        rnn_dropout=rnn_dropout,
-    )
+    """Embedding -> recurrent or pooled encoder -> shared MLP -> logits."""
+    if pooling is None:
+        encoder = RecurrentSentenceEncoder(
+            embedding_weights,
+            pad_id,
+            rnn_type=rnn_type,
+            hidden_size=hidden_size,
+            num_layers=num_layers,
+            bidirectional=bidirectional,
+            freeze_embeddings=freeze_embeddings,
+            embedding_dropout=embedding_dropout,
+            rnn_dropout=rnn_dropout,
+        )
+    else:
+        encoder = PoolingSentenceEncoder(
+            embedding_weights,
+            pad_id,
+            pooling=pooling,
+            freeze_embeddings=freeze_embeddings,
+            embedding_dropout=embedding_dropout,
+        )
     return PairClassifier(encoder, num_classes, mlp_hidden_dims, mlp_dropout)

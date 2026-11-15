@@ -1,9 +1,10 @@
 """Train one NLI model on SNLI with Lightning and Weights & Biases.
 
-MPNet tokenizer -> chosen MPNet embedding -> recurrent encoder (gru/lstm/rnn) -> MLP.
+MPNet tokenizer -> chosen embedding -> recurrent or pooled sentence encoder -> MLP.
 
 Examples:
     uv run python -m src.train_nli --embedding nli-mpnet-base-v2 --rnn gru
+    uv run python -m src.train_nli --pooling mean --wandb-mode disabled
     uv run python -m src.train_nli --params-file output/tuning/<study>_best.json
 """
 
@@ -17,6 +18,7 @@ from src.dataset import LABEL_NAMES
 from src.embeddings import EMBEDDINGS
 from src.lit_data import SNLIDataModule
 from src.models import RNN_TYPES
+from src.pooling_sentence_encoder import POOLING_TYPES
 from src.runner import DEFAULT_PARAMS, make_wandb_logger, train
 
 
@@ -43,6 +45,11 @@ def parse_args(argv=None):
         "--embedding-lr-scale", type=float, default=d["embedding_lr_scale"]
     )
     emb.add_argument("--embedding-dropout", type=float, default=d["embedding_dropout"])
+
+    p.add_argument(
+        "--pooling", choices=POOLING_TYPES, default=d["pooling"],
+        help="Use mean/sum/max pooling instead of --rnn (default: recurrent encoder)",
+    )
 
     rnn = p.add_argument_group("recurrent encoder")
     rnn.add_argument("--rnn", choices=sorted(RNN_TYPES), default=d["rnn"])
@@ -89,7 +96,8 @@ def main(argv=None):
     L.seed_everything(args.seed, workers=True)
     params = params_from_args(args)
 
-    run_name = args.run_name or f"{params['embedding']}-{params['rnn']}"
+    encoder_name = params["pooling"] or params["rnn"]
+    run_name = args.run_name or f"{params['embedding']}-{encoder_name}"
     logger = make_wandb_logger(
         args.wandb_project, run_name, args.wandb_entity, mode=args.wandb_mode
     )

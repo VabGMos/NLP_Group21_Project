@@ -1,4 +1,4 @@
-"""LightningModule for NLI pair classification (embedding -> recurrent encoder -> MLP)."""
+"""LightningModule for NLI classification with recurrent or pooled sentence encoders."""
 
 import lightning as L
 import torch
@@ -38,6 +38,7 @@ class NLIModule(L.LightningModule):
         mlp_dropout: float = 0.2,
         lr: float = 1e-3,
         weight_decay: float = 1e-4,
+        pooling: str | None = None,
     ):
         super().__init__()
         self.save_hyperparameters(ignore=["embedding_weights"])
@@ -54,6 +55,7 @@ class NLIModule(L.LightningModule):
             rnn_dropout=rnn_dropout,
             mlp_hidden_dims=(mlp_width,) * mlp_layers,
             mlp_dropout=mlp_dropout,
+            pooling=pooling,
         )
         self.criterion = nn.CrossEntropyLoss()
         self.metrics = nn.ModuleDict(
