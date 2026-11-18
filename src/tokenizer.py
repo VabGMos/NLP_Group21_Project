@@ -3,6 +3,30 @@ from tokenizers.models import BPE
 from tokenizers.normalizers import Lowercase
 from tokenizers.pre_tokenizers import Metaspace
 from tokenizers.trainers import BpeTrainer
+from transformers import AutoTokenizer
+
+# Every embedding in src.embeddings uses this vocabulary, so it is the single tokenizer.
+MPNET_TOKENIZER_NAME = "sentence-transformers/all-mpnet-base-v2"
+
+
+def load_mpnet_tokenizer(name: str = MPNET_TOKENIZER_NAME):
+    return AutoTokenizer.from_pretrained(name)
+
+
+def tokenize_texts(
+    texts: list[str], tokenizer, max_length: int, batch_size: int = 1024
+) -> list[list[int]]:
+    """Token ids (with special tokens, truncated, not padded) for each text."""
+    ids = []
+    for start in range(0, len(texts), batch_size):
+        batch = tokenizer(
+            texts[start : start + batch_size],
+            add_special_tokens=True,
+            truncation=True,
+            max_length=max_length,
+        )
+        ids.extend(batch["input_ids"])
+    return ids
 
 PAD_TOKEN = "[PAD]"
 UNK_TOKEN = "[UNK]"
